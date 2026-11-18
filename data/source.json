@@ -1,0 +1,16 @@
+{
+    "repository": "https://github.com/provinciesincijfers/gebiedsniveaus",
+    "ref": "master",
+    "fetched_at": "2026-11-18T09:02:06+00:00",
+    "license": "Modellicentie gratis hergebruik (Vlaanderen)",
+    "layers": {
+        "wijken": {
+            "source_file": "data_voor_swing/shapefiles/ggw7.txt",
+            "areas": 2823
+        },
+        "deelgemeenten": {
+            "source_file": "data_voor_swing/shapefiles/deelgemeente.txt",
+            "areas": 1119
+        }
+    }
+}
