@@ -34,7 +34,7 @@ $source = json_decode((string) @file_get_contents(dirname(__DIR__) . '/data/sour
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Wijk van een event</title>
+    <title>Wijk van een event of place</title>
     <style>
         :root { --fg: #1d2330; --muted: #5d6677; --line: #d9dde5; --bg: #f6f7f9; --card: #fff; --accent: #0b5cad; --err: #b42318; --errbg: #fef3f2; --note: #fff8e6; }
         * { box-sizing: border-box; }
@@ -61,21 +61,21 @@ $source = json_decode((string) @file_get_contents(dirname(__DIR__) . '/data/sour
 </head>
 <body>
 <main>
-    <h1>In welke wijk valt dit event?</h1>
-    <p class="lead">Plak een UiTdatabank-link of een event-UUID.</p>
+    <h1>In welke wijk valt dit event of deze place?</h1>
+    <p class="lead">Plak een UiTdatabank-link naar een event of place, of enkel de UUID.</p>
 
     <form method="get">
-        <input type="text" name="event" value="<?= e($input) ?>" placeholder="https://io.uitdatabank.be/events/…" autofocus>
+        <input type="text" name="event" value="<?= e($input) ?>" placeholder="https://io.uitdatabank.be/events/… of /places/…" autofocus>
         <button type="submit">Zoek wijk</button>
     </form>
     <p class="hint">
         Productie, acceptatie (<code>acc</code> / <code>io-acc</code>) en test (<code>test</code> / <code>io-test</code>) worden herkend.
-        Een losse UUID wordt altijd op productie opgezocht.
+        Een losse UUID wordt altijd op productie opgezocht, eerst als event en daarna als place.
     </p>
 
     <div class="note">
         <strong>Let op:</strong> de wijkindeling dekt enkel Vlaanderen en Brussel.
-        Voor events in Wallonië (of buiten België) wordt geen wijk gevonden.
+        Voor events en places in Wallonië (of buiten België) wordt geen wijk gevonden.
     </div>
 
     <?php if ($error !== null): ?>
@@ -89,7 +89,7 @@ $source = json_decode((string) @file_get_contents(dirname(__DIR__) . '/data/sour
                 <p class="wijk none">Geen wijk</p>
             <?php endif; ?>
             <dl>
-                <dt>Event</dt>
+                <dt><?= e($result['type']->label()) ?></dt>
                 <dd><?= e($result['name'] ?? '–') ?></dd>
                 <dt>Omgeving</dt>
                 <dd><?= e($result['reference']->environment->label()) ?></dd>
@@ -102,14 +102,14 @@ $source = json_decode((string) @file_get_contents(dirname(__DIR__) . '/data/sour
                 <dt>Coördinaten</dt>
                 <dd><?= e(sprintf('%F, %F', $result['latitude'], $result['longitude'])) ?></dd>
                 <dt>Bron</dt>
-                <dd><a href="<?= e($result['reference']->ioUrl()) ?>"><?= e($result['reference']->ioUrl()) ?></a></dd>
+                <dd><a href="<?= e($result['url']) ?>"><?= e($result['url']) ?></a></dd>
             </dl>
         </div>
     <?php endif; ?>
 
     <footer>
         Wijken voor omgevingsanalyse. © gemeentebesturen, verzameld door Data &amp; Analyse van de Vlaamse provincies.<br>
-        Bron:<a href="https://github.com/provinciesincijfers/gebiedsniveaus">provinciesincijfers/gebiedsniveaus</a>
+        Bron: <a href="https://github.com/provinciesincijfers/gebiedsniveaus">provinciesincijfers/gebiedsniveaus</a>
         (Modellicentie gratis hergebruik)<?php if (is_array($source)): ?>, opgehaald op <?= e(substr((string) $source['fetched_at'], 0, 10)) ?> (<?= e((string) $source['ref']) ?>)<?php endif; ?>.
     </footer>
 </main>

@@ -13,7 +13,7 @@ final class InvalidInput extends LookupFailed
 {
 }
 
-final class EventNotFound extends LookupFailed
+final class OfferNotFound extends LookupFailed
 {
 }
 

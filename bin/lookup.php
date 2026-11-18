@@ -3,9 +3,10 @@
 declare(strict_types=1);
 
 /*
- * Zoek de wijk van een event vanaf de command line.
+ * Zoek de wijk van een event of place vanaf de command line.
  *
  *   php bin/lookup.php https://io-acc.uitdatabank.be/events/<uuid>
+ *   php bin/lookup.php https://acc.uitdatabank.be/places/<uuid>
  *   php bin/lookup.php <uuid>
  */
 
@@ -15,7 +16,7 @@ use PocWijken\LookupFailed;
 use PocWijken\WijkLookup;
 
 if ($argc < 2) {
-    fwrite(STDERR, "Gebruik: php bin/lookup.php <event-url|uuid>\n");
+    fwrite(STDERR, "Gebruik: php bin/lookup.php <event-url|place-url|uuid>\n");
     exit(1);
 }
 
@@ -27,7 +28,8 @@ try {
 }
 
 printf("Omgeving:     %s\n", $result['reference']->environment->label());
-printf("Event:        %s\n", $result['name'] ?? '-');
+printf("Type:         %s\n", $result['type']->label());
+printf("Naam:         %s\n", $result['name'] ?? '-');
 printf("Gemeente:     %s\n", $result['locality'] ?? '-');
 printf("Coördinaten:  %F, %F\n", $result['latitude'], $result['longitude']);
 printf("Wijk:         %s\n", $result['wijk'] ? "{$result['wijk']['naam']} ({$result['wijk']['code']})" : 'geen wijk');

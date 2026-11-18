@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace PocWijken;
 
-final class EventReference
+final class OfferReference
 {
     private const UUID_PATTERN = '[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}';
 
@@ -19,14 +19,18 @@ final class EventReference
         'test.uitdatabank.be' => Environment::Test,
     ];
 
+    /**
+     * @param list<OfferType> $types De types die geprobeerd worden, in volgorde.
+     */
     private function __construct(
         public readonly Environment $environment,
         public readonly string $uuid,
+        public readonly array $types,
     ) {
     }
 
     /**
-     * Een losse UUID wordt altijd als productie beschouwd.
+     * Een losse UUID wordt altijd als productie beschouwd, en eerst als event en dan als place opgezocht.
      *
      * @throws InvalidInput
      */
@@ -34,11 +38,11 @@ final class EventReference
     {
         $input = strtolower(trim($input));
         if ($input === '') {
-            throw new InvalidInput('Vul een event-URL of UUID in.');
+            throw new InvalidInput('Vul een event- of place-URL of een UUID in.');
         }
 
         if (preg_match('#^' . self::UUID_PATTERN . '$#', $input) === 1) {
-            return new self(Environment::Prod, $input);
+            return new self(Environment::Prod, $input, [OfferType::Event, OfferType::Place]);
         }
 
         if (!str_contains($input, '://')) {
@@ -52,15 +56,15 @@ final class EventReference
             throw new InvalidInput('Geen geldige UiTdatabank-link of UUID. Aanvaard: (io.)uitdatabank.be, (io-)acc.uitdatabank.be, (io-)test.uitdatabank.be of een losse UUID.');
         }
 
-        if (preg_match('#^/events/(' . self::UUID_PATTERN . ')(/|$)#', $path, $matches) !== 1) {
-            throw new InvalidInput('De link moet naar een event wijzen: /events/{uuid}.');
+        if (preg_match('#^/(events|places)/(' . self::UUID_PATTERN . ')(/|$)#', $path, $matches) !== 1) {
+            throw new InvalidInput('De link moet naar een event of place wijzen: /events/{uuid} of /places/{uuid}.');
         }
 
-        return new self(self::HOSTS[$host], $matches[1]);
+        return new self(self::HOSTS[$host], $matches[2], [OfferType::from($matches[1])]);
     }
 
-    public function ioUrl(): string
+    public function ioUrl(OfferType $type): string
     {
-        return $this->environment->ioBaseUrl() . '/events/' . $this->uuid;
+        return $this->environment->ioBaseUrl() . '/' . $type->value . '/' . $this->uuid;
     }
 }

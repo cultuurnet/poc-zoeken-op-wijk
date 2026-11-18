@@ -26,7 +26,7 @@ geoshapes: ## Haal de wijk- en deelgemeentegrenzen (opnieuw) op (REF=master|<sha
 data/wijken.json:
 	$(PHP) bin/fetch-geoshapes.php --ref=$(REF)
 
-lookup: data/wijken.json ## Zoek de wijk van een event: make lookup EVENT=<url|uuid>
+lookup: data/wijken.json ## Zoek de wijk van een event of place: make lookup EVENT=<url|uuid>
 	@test -n "$(EVENT)" || (echo "Gebruik: make lookup EVENT=<url|uuid>" && exit 1)
 	$(PHP) bin/lookup.php "$(EVENT)"
 

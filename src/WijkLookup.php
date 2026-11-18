@@ -26,7 +26,9 @@ final class WijkLookup
 
     /**
      * @return array{
-     *     reference: EventReference,
+     *     reference: OfferReference,
+     *     type: OfferType,
+     *     url: string,
      *     name: ?string,
      *     locality: ?string,
      *     latitude: float,
@@ -39,16 +41,21 @@ final class WijkLookup
      */
     public function lookup(string $input): array
     {
-        $reference = EventReference::fromInput($input);
-        $event = $this->client->fetchEvent($reference);
-        $coordinates = UitdatabankClient::coordinates($event);
+        $reference = OfferReference::fromInput($input);
+        ['type' => $type, 'offer' => $offer] = $this->client->fetchOffer($reference);
+        $coordinates = UitdatabankClient::coordinates($type, $offer);
+
+        // Bij een event zit het adres in de genestelde location (een place), bij een place op het hoogste niveau.
+        $place = $type === OfferType::Event ? ($offer['location'] ?? []) : $offer;
 
         return [
             'reference' => $reference,
-            'name' => self::translated($event['name'] ?? null, $event['mainLanguage'] ?? 'nl'),
+            'type' => $type,
+            'url' => $reference->ioUrl($type),
+            'name' => self::translated($offer['name'] ?? null, $offer['mainLanguage'] ?? 'nl'),
             'locality' => self::translated(
-                $event['location']['address'] ?? null,
-                $event['location']['mainLanguage'] ?? 'nl'
+                $place['address'] ?? null,
+                $place['mainLanguage'] ?? 'nl'
             )['addressLocality'] ?? null,
             'latitude' => $coordinates['latitude'],
             'longitude' => $coordinates['longitude'],
