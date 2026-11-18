@@ -2,6 +2,8 @@
 
 Geef een link naar een UiTdatabank-event (of enkel de UUID) en de POC toont in welke wijk en deelgemeente het event plaatsvindt. Hiervoor gebruikt de POC de geocoördinaten uit `location.geo` van het event.
 
+![img.png](img.png)
+
 ## Vereisten
 
 - Docker (met Docker Compose) en `make`. Alles draait in een `php:8.4-cli-alpine`-container.
@@ -19,8 +21,6 @@ make                  # overzicht van alle commando's
 ```
 
 Ontbreekt de geodata in `data/`, dan halen `make start` en `make lookup` die eerst op.
-
-Zonder Docker kan het ook met PHP 8.1+ lokaal: `php -S 127.0.0.1:8088 -t public` en `php bin/lookup.php <url|uuid>`.
 
 ## Ondersteunde invoer
 
@@ -40,7 +40,7 @@ Zonder Docker kan het ook met PHP 8.1+ lokaal: `php -S 127.0.0.1:8088 -t public`
 2. `UitdatabankClient` haalt de JSON-LD van het event op en leest `location.geo`.
 3. `AreaLocator` zoekt via point-in-polygon de wijk en de deelgemeente. Eerst wordt op bounding box gefilterd, daarna gebeurt ray casting op de (Multi)Polygonen.
 
-Eén opzoeking duurt een paar milliseconden. Het inladen van de JSON (±7 MB) gebeurt per request, wat voor een POC volstaat. Voor productie kan je de data cachen (APCu, of een gegenereerd PHP-bestand voor opcache) of naar Elasticsearch verhuizen (`geo_shape`-veld met een `intersects`-query op een punt).
+Eén opzoeking duurt een paar milliseconden. Het inladen van de JSON (±7 MB) gebeurt per request, wat voor een POC volstaat. Voor productie kunnen we dit naar Elasticsearch verhuizen (`geo_shape`-veld met een `intersects`-query op een punt).
 
 ## Geodata
 
@@ -95,19 +95,3 @@ Let op: wijkcodes kunnen bij een update wijzigen of verdwijnen. Sla je ooit wijk
 De wijkindeling wordt verdeeld onder de [Vlaamse modellicentie gratis hergebruik](https://github.com/provinciesincijfers/gebiedsniveaus/blob/master/gemeente_statsec_wijken/license.md). Die laat hergebruik toe voor elk rechtmatig doel, ook commercieel. Bij elk hergebruik moet deze bronvermelding verplicht vermeld worden:
 
 > Wijken voor omgevingsanalyse. © gemeentebesturen, verzameld door Data & Analyse van de Vlaamse provincies
-
-De POC toont die in de footer. Verder mag je niet de indruk wekken dat het gebruik officieel goedgekeurd is door de licentiegever.
-
-**Nog na te gaan:**
-- De licentie verwijst formeel naar de map `gemeente_statsec_wijken`. De geometrie die wij gebruiken komt uit `data_voor_swing/shapefiles`. Laat bevestigen dat de licentie ook voor die bestanden geldt, en ook voor de deelgemeente-laag.
-- Of het geplande gebruik buiten deze POC binnen de licentie valt.
-
-## Structuur
-
-```
-bin/fetch-geoshapes.php   geodata ophalen en omzetten naar data/
-bin/lookup.php            opzoeking via CLI
-data/                     gegenereerde geodata (gecommit)
-public/index.php          webpagina
-src/                      EventReference, UitdatabankClient, AreaLocator, WijkLookup
-```
